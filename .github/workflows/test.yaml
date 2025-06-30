@@ -1,4 +1,4 @@
-name: Docker Kubernetes Test Workflow
+name: Docker-Kubernetes Test Workflow
 
 on:
     pull_request:
