@@ -11,16 +11,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Build and Push Docker images
-        uses: docker/build-push-action@v4
-      - run: docker build -t ibnumahamat/multi-client ./client
-      - run: docker build -t ibnumahamat/multi-nginx ./nginx
-      - run: docker build -t ibnumahamat/multi-server ./server
-      - run: docker build -t ibnumahamat/multi-worker ./worker
+        run: docker build -t ibnumahamat/multi-client ./client
+        run: docker build -t ibnumahamat/multi-nginx ./nginx
+        run: docker build -t ibnumahamat/multi-server ./server
+        run: docker build -t ibnumahamat/multi-worker ./worker
 
-      - run: docker push ibnumahamat/multi-client
-      - run: docker push ibnumahamat/multi-nginx
-      - run: docker push ibnumahamat/multi-server
-      - run: docker push ibnumahamat/multi-worker
+        run: docker push ibnumahamat/multi-client
+        run: docker push ibnumahamat/multi-nginx
+        run: docker push ibnumahamat/multi-server
+        run: docker push ibnumahamat/multi-worker
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
