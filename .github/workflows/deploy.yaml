@@ -1,39 +1,52 @@
 name: Docker Kubernetes MultiDocker Deployment Workflow
+
 on:
   push:
     branches:
-      - main # check your repo, your default branch might be master!
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build client image
-        run: docker build -t ibnumahamat/multi-client ./client
-      - name: Build ngnix image
-        run: docker build -t ibnumahamat/multi-nginx ./nginx
-      - name: Build server image
-        run: docker build -t ibnumahamat/multi-server ./server
-      - name: Build worker image
-        run: docker build -t ibnumahamat/multi-worker ./worker
-      - name: Push client image
-        run: docker push ibnumahamat/multi-client
-      - name: Push ngnic image
-        run: docker push ibnumahamat/multi-nginx
-      - name: Push server image
-        run: docker push ibnumahamat/multi-server
-      - name: Push worker image
-        run: docker push ibnumahamat/multi-worker
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and tag Docker images
+        run: |
+          docker build -t ibnumahamat/multi-client:latest ./client
+          docker build -t ibnumahamat/multi-nginx:latest ./nginx
+          docker build -t ibnumahamat/multi-server:latest ./server
+          docker build -t ibnumahamat/multi-worker:latest ./worker
+
+          # Also tag with Git SHA for traceability
+          docker tag ibnumahamat/multi-client:latest ibnumahamat/multi-client:${{ github.sha }}
+          docker tag ibnumahamat/multi-nginx:latest ibnumahamat/multi-nginx:${{ github.sha }}
+          docker tag ibnumahamat/multi-server:latest ibnumahamat/multi-server:${{ github.sha }}
+          docker tag ibnumahamat/multi-worker:latest ibnumahamat/multi-worker:${{ github.sha }}
+
+      - name: Push Docker images to Docker Hub
+        run: |
+          docker push ibnumahamat/multi-client:latest
+          docker push ibnumahamat/multi-client:${{ github.sha }}
+
+          docker push ibnumahamat/multi-nginx:latest
+          docker push ibnumahamat/multi-nginx:${{ github.sha }}
+
+          docker push ibnumahamat/multi-server:latest
+          docker push ibnumahamat/multi-server:${{ github.sha }}
+
+          docker push ibnumahamat/multi-worker:latest
+          docker push ibnumahamat/multi-worker:${{ github.sha }}
 
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
 
       - name: Deploy to AWS Elastic Beanstalk
-        # Ensure you have the AWS credentials set in your GitHub secrets
-        # AWS_ACCESS_KEY and AWS_SECRET_KEY
-        # Also ensure you have the beanstalk-deploy action installed in your repository
         uses: einaregilsson/beanstalk-deploy@v21
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
