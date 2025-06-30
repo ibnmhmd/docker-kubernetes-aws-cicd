@@ -1,0 +1,53 @@
+name: Docker Kubernetes MultiDocker Deployment Workflow
+on:
+  push:
+    branches:
+      - main # check your repo, your default branch might be master!
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build and Push Docker images
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ibnumahamat/multi-client:latest
+            ibnumahamat/multi-nginx:latest
+            ibnumahamat/multi-server:latest
+            ibnumahamat/multi-worker:latest 
+      - run: docker build -t ibnumahamat/multi-client ./client
+      - run: docker build -t ibnumahamat/multi-nginx ./nginx
+      - run: docker build -t ibnumahamat/multi-server ./server
+      - run: docker build -t ibnumahamat/multi-worker ./worker
+
+      - run: docker push ibnumahamat/multi-client
+      - run: docker push ibnumahamat/multi-nginx
+      - run: docker push ibnumahamat/multi-server
+      - run: docker push ibnumahamat/multi-worker
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to AWS Elastic Beanstalk
+        # Ensure you have the AWS credentials set in your GitHub secrets
+        # AWS_ACCESS_KEY and AWS_SECRET_KEY
+        # Also ensure you have the beanstalk-deploy action installed in your repository
+        uses: einaregilsson/beanstalk-deploy@v21
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION: eu-north-1
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: multi-docker
+          environment_name: Multi-docker-env
+          existing_bucket_name: elasticbeanstalk-eu-north-1-439446323892
+          region: eu-north-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
