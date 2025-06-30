@@ -2,7 +2,7 @@ name: Docker-Kubernetes Test Workflow
 on:
   pull_request:
         branches: 
-            - dev
+            - main
         paths:
             - 'client/**'
 
