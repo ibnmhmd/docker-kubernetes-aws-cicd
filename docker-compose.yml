@@ -1,11 +1,11 @@
 version: '3'
 services:
   client:
-    image: 'ibnumahamat/docker-client'
+    image: 'ibnumahamat/multi-client'
     mem_limit: 128m
     hostname: client
   api:
-    image: 'ibnumahamat/docker-server'
+    image: 'ibnumahamat/multi-server'
     mem_limit: 128m
     hostname: api
     environment:
@@ -17,14 +17,14 @@ services:
       - PGPASSWORD=$PGPASSWORD
       - PGPORT=$PGPORT
   worker:
-    image: 'ibnumahamat/docker-worker'
+    image: 'ibnumahamat/multi-worker'
     mem_limit: 128m
     hostname: worker
     environment:
       - REDIS_HOST=$REDIS_HOST
       - REDIS_PORT=$REDIS_PORT
   nginx:
-    image: 'ibnumahamat/docker-nginx'
+    image: 'ibnumahamat/multi-nginx'
     mem_limit: 128m
     hostname: nginx
     ports:
