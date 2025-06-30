@@ -10,15 +10,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build and Push Docker images
+      - name: Build client image
         run: docker build -t ibnumahamat/multi-client ./client
+      - name: Build ngnix image
         run: docker build -t ibnumahamat/multi-nginx ./nginx
+      - name: Build server image
         run: docker build -t ibnumahamat/multi-server ./server
+      - name: Build worker image
         run: docker build -t ibnumahamat/multi-worker ./worker
-
+      - name: Push client image
         run: docker push ibnumahamat/multi-client
+      - name: Push ngnic image
         run: docker push ibnumahamat/multi-nginx
+      - name: Push server image
         run: docker push ibnumahamat/multi-server
+      - name: Push worker image
         run: docker push ibnumahamat/multi-worker
 
       - name: Generate deployment package
